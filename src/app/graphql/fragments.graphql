@@ -1,0 +1,47 @@
+fragment ActorFragment on Actor {
+  login
+  avatarUrl
+  url
+}
+
+fragment PageInfoFragment on PageInfo {
+  endCursor
+  startCursor
+  hasNextPage
+  hasPreviousPage
+}
+
+fragment IssueFragment on Issue {
+  number
+  state
+  id
+  url
+  closed
+  title
+  bodyUrl
+  createdAt
+  updatedAt
+  author {
+    ...ActorFragment
+  }
+}
+
+fragment IssueDetailFragment on Issue {
+  ...IssueFragment
+  bodyHTML
+  comments(first: 10, orderBy: { field: UPDATED_AT, direction: ASC }) {
+    pageInfo {
+      ...PageInfoFragment
+    }
+    totalCount
+    edges {
+      node {
+        id
+        bodyHTML
+        author {
+          ...ActorFragment
+        }
+      }
+    }
+  }
+}

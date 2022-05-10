@@ -1,0 +1,17 @@
+overwrite: true
+# watch: true
+schema: ${REACT_APP_GITHUB_GRAPHQL_SCHEMA}
+documents:
+  - './src/app/**/*.graphql'
+generates:
+  ./src/app/graphql/__generated__/generated-types.tsx:
+    config:
+      withHooks: true
+      withHOC: true
+      withComponent: true
+      enumsAsTypes: true
+    plugins:
+      - typescript
+      - typescript-operations
+      - typescript-react-apollo
+      - named-operations-object

@@ -1,0 +1,47 @@
+# query fetchIssueDetails($number: Int!) {
+#   repository(owner: "facebook", name: "react") {
+#     issue(number: $number) {
+#       ...IssueDetailFragment
+#     }
+#   }
+# }
+
+query fetchIssueDetails($id: ID!) {
+  node(id: $id) {
+    ...IssueDetailFragment
+  }
+}
+
+query fetchIssueComments($number: Int!) {
+  repository(owner: "facebook", name: "react") {
+    issue(number: $number) {
+      comments(first: 10, orderBy: { field: UPDATED_AT, direction: ASC }) {
+        pageInfo {
+          ...PageInfoFragment
+        }
+        totalCount
+        edges {
+          node {
+            id
+            bodyHTML
+            author {
+              ...ActorFragment
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+query fetchIssues($query: String!, $after: String, $before: String) {
+  search(query: $query, after: $after, before: $before, type: ISSUE, first: 10) {
+    pageInfo {
+      ...PageInfoFragment
+    }
+    issueCount
+    nodes {
+      ...IssueFragment
+    }
+  }
+}
