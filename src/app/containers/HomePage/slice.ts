@@ -5,10 +5,8 @@ import { IHomePageState } from './types';
 const initialState: IHomePageState = {
   keyword: '',
   type: 'OPEN',
-  query: '',
-  issues: [],
-  error: undefined,
-  loading: false
+  startCursor: '',
+  endCursor: ''
 };
 
 const HomePageSlice = createSlice({
@@ -27,26 +25,20 @@ const HomePageSlice = createSlice({
         keyword: action.payload
       }
     },
-    SET_ISSUES: (state, action) => {
+    SET_START_CURSOR: (state, action) => {
       return {
         ...state,
-        issues: action.payload
+        startCursor: action.payload
       }
     },
-    SET_ERROR: (state, action) => {
+    SET_END_CURSOR: (state, action) => {
       return {
         ...state,
-        error: action.payload
-      }
-    },
-    SET_LOADING: (state, action) => {
-      return {
-        ...state,
-        loading: action.payload
+        endCursor: action.payload
       }
     }
   },
 });
 
-export const { SET_TYPE, SET_KEYWORD, SET_ISSUES, SET_ERROR, SET_LOADING } = HomePageSlice.actions;
+export const { SET_TYPE, SET_KEYWORD, SET_START_CURSOR, SET_END_CURSOR } = HomePageSlice.actions;
 export default HomePageSlice.reducer;

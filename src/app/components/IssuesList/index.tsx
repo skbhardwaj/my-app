@@ -1,4 +1,9 @@
+import { Dispatch } from '@reduxjs/toolkit';
+import { Link } from 'react-router-dom';
 import styled from 'styled-components';
+import { SET_END_CURSOR, SET_START_CURSOR } from '../../containers/HomePage/slice';
+import { Issue, useFetchIssuesQuery } from '../../graphql/__generated__/generated-types';
+import { useAppDispatch, useAppSelector } from '../../hooks';
 import InfoLabel from '../InfoLabel';
 import { IIssuesListProps } from './types';
 
@@ -44,8 +49,18 @@ const IssuesLi = styled.li`
 
 `;
 
+const actionDispatch = (dispatch: Dispatch) => ({
+  setStartCursor: (data: any) => dispatch(SET_START_CURSOR(data)),
+  setEndCursor: (data: any) => dispatch(SET_END_CURSOR(data)),
+});
+
 const IssuesList = (props: IIssuesListProps) => {
-  const { data, loading, error } = props?.result;
+  const { keyword, type } = useAppSelector((state) => state.homePage);
+
+  const { setStartCursor, setEndCursor } = actionDispatch(useAppDispatch());
+
+  const query = `${process.env.REACT_APP_GITHUB_REPO}${keyword ? ` ${keyword} in:title,body` : ""} is:${type} type:issue`;
+  const { loading, error, data } = useFetchIssuesQuery({ variables: { query } });
 
   if (loading) {
     return (
@@ -63,33 +78,48 @@ const IssuesList = (props: IIssuesListProps) => {
     );
   }
 
-  if (!data) {
-    return (
-      <IssuesListContainer>
-        <InfoLabel labelVariant={'error'} text={`No Results found ... 😞`} />
-      </IssuesListContainer>
-    );
+  if (!data || !data.search || !data.search.nodes) {
+    return null;
   }
 
   const { issueCount, pageInfo, nodes } = data.search;
-  const { hasNextPage, hasPreviousPage } = pageInfo;
-  // const { number } = nodes;
+  const { hasNextPage, hasPreviousPage, endCursor, startCursor } = pageInfo;
+  const issues = nodes as Issue[];
+
+  const onPrevClickHandler = () => {
+    console.log({ endCursor, startCursor });
+    // setStartCursor(startCursor);
+    setEndCursor(endCursor);
+  }
+
+  const onNextClickHandler = () => {
+    console.log({ endCursor, startCursor });
+    setStartCursor(startCursor);
+    // setEndCursor(endCursor);
+  }
 
 
   return (
     <>
       <IssuesListContainer>
         <>
-          <InfoLabel labelVariant={'success'} text={`Showing ${issueCount} of results !`} />
-          {/* <IssuesUl>
-            {data.map(({ id, title }) => (
+          <InfoLabel labelVariant={'success'} text={`Showing ${issues.length}/${issueCount} results !`} />
+
+          <IssuesUl>
+            {issues.map(({ id, title }) => (
               <IssuesLi key={id}>
                 <Link to={`/issue/${id}`}>{title}</Link>
               </IssuesLi>
             ))}
-          </IssuesUl> */}
-          <PaginationButton disabled={!hasPreviousPage} className='prev'>{'<'}</PaginationButton>
-          <PaginationButton disabled={!hasNextPage} className='next'>{'>'}</PaginationButton>
+          </IssuesUl>
+          {
+            issues.length ? (
+              <>
+                <PaginationButton onClick={onPrevClickHandler} disabled={!hasPreviousPage} className='prev'>{'<'}</PaginationButton>
+                <PaginationButton onClick={onNextClickHandler} disabled={!hasNextPage} className='next'>{'>'}</PaginationButton>
+              </>
+            ) : null
+          }
         </>
       </IssuesListContainer>
     </>
